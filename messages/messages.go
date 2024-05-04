@@ -13,7 +13,7 @@ type MessageResponse struct {
 }
 
 type Route struct {
-	TrxId string           	 `json:"trxId"`
+	TrxId string             `json:"trxId"`
 	Org   ProcessingInstance `json:"org"`
 	Dst   ProcessingInstance `json:"dst"`
 }
@@ -31,8 +31,8 @@ type BodyResponse struct {
 }
 
 type BodyRequest struct {
-	Data           Data           `json:"data"`
-	Metadata       Metadata       `json:"metadata"`
+	Data     Data     `json:"data"`
+	Metadata Metadata `json:"metadata"`
 }
 
 type Data struct {
@@ -63,7 +63,11 @@ func (m *Route) swapRouteAsyncronous() {
 
 // To string method for Structures
 
-func (m *Message) String() string {
+func (m *MessageRequest) String() string {
+	return fmt.Sprintf("Message{Route: %s, Msg: %s}", m.Route.String(), m.Body.String())
+}
+
+func (m *MessageResponse) String() string {
 	return fmt.Sprintf("Message{Route: %s, Msg: %s}", m.Route.String(), m.Body.String())
 }
 
@@ -75,8 +79,12 @@ func (m *ProcessingInstance) String() string {
 	return fmt.Sprintf("ProcessingInstance{Service: %s, SrvId: %s, Node: %s, InstId: %s}", m.Service, m.SrvId, m.Node, m.InstId)
 }
 
-func (m *Body) String() string {
+func (m *BodyResponse) String() string {
 	return fmt.Sprintf("Body{Data: %s, Metadata: %s, ResponseStatus: %s}", m.Data.String(), m.Metadata.String(), m.ResponseStatus.String())
+}
+
+func (m *BodyRequest) String() string {
+	return fmt.Sprintf("Body{Data: %s, Metadata: %s}", m.Data.String(), m.Metadata.String())
 }
 
 func (m *Metadata) String() string {
