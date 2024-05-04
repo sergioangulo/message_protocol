@@ -2,13 +2,18 @@ package messages
 
 import "fmt"
 
-type Message struct {
-	Route Route `json:"route"`
-	Body  Body  `json:"msg"`
+type MessageRequest struct {
+	Route Route       `json:"route"`
+	Body  BodyRequest `json:"msg"`
+}
+
+type MessageResponse struct {
+	Route Route        `json:"route"`
+	Body  BodyResponse `json:"msg"`
 }
 
 type Route struct {
-	TrxId string             `json:"trxId"`
+	TrxId string           	 `json:"trxId"`
 	Org   ProcessingInstance `json:"org"`
 	Dst   ProcessingInstance `json:"dst"`
 }
@@ -19,10 +24,15 @@ type ProcessingInstance struct {
 	InstId  string `json:"instId"`
 }
 
-type Body struct {
+type BodyResponse struct {
 	Data           Data           `json:"data"`
 	Metadata       Metadata       `json:"metadata"`
 	ResponseStatus ResponseStatus `json:"response_status"`
+}
+
+type BodyRequest struct {
+	Data           Data           `json:"data"`
+	Metadata       Metadata       `json:"metadata"`
 }
 
 type Data struct {
