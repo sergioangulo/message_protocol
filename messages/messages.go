@@ -113,7 +113,7 @@ func (m Data) String() string {
 	return str
 }
 
-func ParseMessageRequest(jsonStringMessageRequest string) (MessageRequest, bool) {
+func (m *MessageRequest) ParseMessageRequest(jsonStringMessageRequest string) (MessageRequest, bool) {
 	var message MessageRequest
 	err := json.Unmarshal([]byte(jsonStringMessageRequest), &message)
 	/* for key, value := range message.Body.Data.Options {
