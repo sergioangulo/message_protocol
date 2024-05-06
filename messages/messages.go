@@ -1,6 +1,9 @@
 package messages
 
-import "fmt"
+import (
+	"encoding/json"
+	"fmt"
+)
 
 type MessageRequest struct {
 	Route Route       `json:"route"`
@@ -108,4 +111,18 @@ func (m Data) String() string {
 	}
 	str += "]}"
 	return str
+}
+
+func ParseMessageRequest(jsonStringMessageRequest string) (MessageRequest, bool) {
+	var message MessageRequest
+	err := json.Unmarshal([]byte(jsonStringMessageRequest), &message)
+	/* for key, value := range message.Body.Data.Options {
+		fmt.Printf("key: %s", key)
+		MessageRequest.Body.Data.Options[key] = value
+	} */
+
+	if err != nil {
+		return message, false
+	}
+	return message, true
 }
