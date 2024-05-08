@@ -10,6 +10,11 @@ type MessageRequest struct {
 	Body  BodyRequest `json:"msg"`
 }
 
+type GenericMessage struct {
+	Route Route           `json:"route"`
+	Body  json.RawMessage `json:"msg"`
+}
+
 type MessageResponse struct {
 	Route Route        `json:"route"`
 	Body  BodyResponse `json:"msg"`
@@ -28,9 +33,9 @@ type ProcessingInstance struct {
 }
 
 type BodyResponse struct {
-	Data           Data           `json:"data"`
-	Metadata       Metadata       `json:"metadata"`
-	ResponseStatus ResponseStatus `json:"response_status"`
+	Data           json.RawMessage `json:"data"`
+	Metadata       Metadata        `json:"metadata"`
+	ResponseStatus ResponseStatus  `json:"response_status"`
 }
 
 type BodyRequest struct {
@@ -83,7 +88,7 @@ func (m *ProcessingInstance) String() string {
 }
 
 func (m *BodyResponse) String() string {
-	return fmt.Sprintf("Body{Data: %s, Metadata: %s, ResponseStatus: %s}", m.Data.String(), m.Metadata.String(), m.ResponseStatus.String())
+	return fmt.Sprintf("Body{Data: %s, Metadata: %s, ResponseStatus: %s}", m.Data, m.Metadata.String(), m.ResponseStatus.String())
 }
 
 func (m *BodyRequest) String() string {
@@ -113,16 +118,12 @@ func (m Data) String() string {
 	return str
 }
 
-func (m *MessageRequest) ParseMessageRequest(jsonStringMessageRequest string) (MessageRequest, bool) {
-	var message MessageRequest
-	err := json.Unmarshal([]byte(jsonStringMessageRequest), &message)
+func (m *MessageRequest) ParseMessageRequest(jsonStringMessageRequest string) bool {
+	err := json.Unmarshal([]byte(jsonStringMessageRequest), &m)
 	/* for key, value := range message.Body.Data.Options {
 		fmt.Printf("key: %s", key)
 		MessageRequest.Body.Data.Options[key] = value
 	} */
 
-	if err != nil {
-		return message, false
-	}
-	return message, true
+	return err == nil
 }
