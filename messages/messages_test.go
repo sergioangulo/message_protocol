@@ -217,7 +217,7 @@ func TestSwapRouteAsyncronous(t *testing.T) {
 	ProcessingInstanceDst := ProcessingInstance{Service: "service2", SrvId: "srvId2", Node: "node2", InstId: "instId2"}
 	route := Route{TrxId: "123456", Org: processingInstanceOrg, Dst: ProcessingInstanceDst}
 	routeExpected := Route{TrxId: "123456", Org: ProcessingInstanceDst, Dst: ProcessingInstance{Service: "service1", SrvId: "srvId1", Node: "", InstId: ""}}
-	route.swapRouteAsyncronous()
+	route.SwapRouteAsyncronous()
 	fmt.Printf("route: %s\n", route.String())
 	if route != routeExpected {
 		t.Errorf("expected %v, got %v", routeExpected, route)

@@ -63,7 +63,7 @@ func (m *Route) SwapRouteSyncronous() {
 	m.Org, m.Dst = m.Dst, m.Org
 }
 
-func (m *Route) swapRouteAsyncronous() {
+func (m *Route) SwapRouteAsyncronous() {
 	m.SwapRouteSyncronous()
 	m.Dst.Node = ""
 	m.Dst.InstId = ""
