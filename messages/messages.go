@@ -21,15 +21,15 @@ type MessageResponse struct {
 }
 
 type Route struct {
-	TrxId string             `json:"trxId"`
-	Org   ProcessingInstance `json:"org"`
-	Dst   ProcessingInstance `json:"dst"`
+	SessionId string             `json:"sessionId"`
+	Org       ProcessingInstance `json:"org"`
+	Dst       ProcessingInstance `json:"dst"`
 }
 type ProcessingInstance struct {
 	Service string `json:"service"`
 	SrvId   string `json:"srvId"`
 	Node    string `json:"node"`
-	InstId  string `json:"instId"`
+	TrxId   string `json:"trxId"`
 }
 
 type BodyResponse struct {
@@ -66,7 +66,7 @@ func (m *Route) SwapRouteSyncronous() {
 func (m *Route) SwapRouteAsyncronous() {
 	m.SwapRouteSyncronous()
 	m.Dst.Node = ""
-	m.Dst.InstId = ""
+	m.Dst.TrxId = ""
 }
 
 // To string method for Structures
@@ -80,11 +80,11 @@ func (m *MessageResponse) String() string {
 }
 
 func (m *Route) String() string {
-	return fmt.Sprintf("Route{TrxId: %s, Org: %s, Dst: %s}", m.TrxId, m.Org.String(), m.Dst.String())
+	return fmt.Sprintf("Route{SessionId: %s, Org: %s, Dst: %s}", m.SessionId, m.Org.String(), m.Dst.String())
 }
 
 func (m *ProcessingInstance) String() string {
-	return fmt.Sprintf("ProcessingInstance{Service: %s, SrvId: %s, Node: %s, InstId: %s}", m.Service, m.SrvId, m.Node, m.InstId)
+	return fmt.Sprintf("ProcessingInstance{Service: %s, SrvId: %s, Node: %s, TrxId: %s}", m.Service, m.SrvId, m.Node, m.TrxId)
 }
 
 func (m *BodyResponse) String() string {

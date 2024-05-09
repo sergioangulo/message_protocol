@@ -9,18 +9,18 @@ import (
 func TestMessage(t *testing.T) {
 	msg := MessageRequest{
 		Route: Route{
-			TrxId: "123456",
+			SessionId: "123456",
 			Org: ProcessingInstance{
 				Service: "service1",
 				SrvId:   "srvId1",
 				Node:    "node1",
-				InstId:  "instId1",
+				TrxId:   "trxId1",
 			},
 			Dst: ProcessingInstance{
 				Service: "service2",
 				SrvId:   "srvId2",
 				Node:    "node2",
-				InstId:  "instId2",
+				TrxId:   "trxId2",
 			},
 		},
 		Body: BodyRequest{
@@ -44,7 +44,7 @@ func TestMessage(t *testing.T) {
 		t.Fatal(err)
 	}
 	bStr := string(b)
-	expected := `{"route":{"trxId":"123456","org":{"service":"service1","srvId":"srvId1","node":"node1","instId":"instId1"},"dst":{"service":"service2","srvId":"srvId2","node":"node2","instId":"instId2"}},"msg":{"data":{"content":"content","options":{"key1":"value1","key2":"value2"}},"metadata":{"retry_number":1,"processing_time_ns":"1000000000","request_stamp":"2020-01-01T00:00:00Z"}}}`
+	expected := `{"route":{"sessionId":"123456","org":{"service":"service1","srvId":"srvId1","node":"node1","trxId":"trxId1"},"dst":{"service":"service2","srvId":"srvId2","node":"node2","trxId":"trxId2"}},"msg":{"data":{"content":"content","options":{"key1":"value1","key2":"value2"}},"metadata":{"retry_number":1,"processing_time_ns":"1000000000","request_stamp":"2020-01-01T00:00:00Z"}}}`
 	if bStr != expected {
 		t.Errorf("expected %s, got %s", expected, bStr)
 	}
@@ -75,9 +75,9 @@ func TestMessageUnmarshal(t *testing.T) {
 	metadata := Metadata{RetryNumber: 1, ProcessingTimeNs: "1000000000", RequestStamp: "2020-01-01T00:00:00Z"}
 	// Agregamos data_input como RawMessage ([]bytes)
 	data_input := dataBytes
-	processingInstanceOrg := ProcessingInstance{Service: "service1", SrvId: "srvId1", Node: "node1", InstId: "instId1"}
-	ProcessingInstanceDst := ProcessingInstance{Service: "service2", SrvId: "srvId2", Node: "node2", InstId: "instId2"}
-	route := Route{TrxId: "123456", Org: processingInstanceOrg, Dst: ProcessingInstanceDst}
+	processingInstanceOrg := ProcessingInstance{Service: "service1", SrvId: "srvId1", Node: "node1", TrxId: "trxId1"}
+	ProcessingInstanceDst := ProcessingInstance{Service: "service2", SrvId: "srvId2", Node: "node2", TrxId: "trxId2"}
+	route := Route{SessionId: "123456", Org: processingInstanceOrg, Dst: ProcessingInstanceDst}
 	output_body := BodyResponse{Data: data_input, Metadata: metadata, ResponseStatus: responseStatus}
 	output_message := MessageResponse{Route: route, Body: output_body}
 	serliazed_msg, err := json.Marshal(output_message)
@@ -104,8 +104,8 @@ func TestMessageUnmarshal(t *testing.T) {
 
 	msg := inputMessage
 
-	if msg.Route.TrxId != "123456" {
-		t.Errorf("expected 123456, got %s", msg.Route.TrxId)
+	if msg.Route.SessionId != "123456" {
+		t.Errorf("expected 123456, got %s", msg.Route.SessionId)
 	}
 	if msg.Route.Org.Service != "service1" {
 		t.Errorf("expected service1, got %s", msg.Route.Org.Service)
@@ -116,8 +116,8 @@ func TestMessageUnmarshal(t *testing.T) {
 	if msg.Route.Org.Node != "node1" {
 		t.Errorf("expected node1, got %s", msg.Route.Org.Node)
 	}
-	if msg.Route.Org.InstId != "instId1" {
-		t.Errorf("expected instId1, got %s", msg.Route.Org.InstId)
+	if msg.Route.Org.TrxId != "trxId1" {
+		t.Errorf("expected trxId1, got %s", msg.Route.Org.TrxId)
 	}
 	if msg.Route.Dst.Service != "service2" {
 		t.Errorf("expected service2, got %s", msg.Route.Dst.Service)
@@ -128,8 +128,8 @@ func TestMessageUnmarshal(t *testing.T) {
 	if msg.Route.Dst.Node != "node2" {
 		t.Errorf("expected node2, got %s", msg.Route.Dst.Node)
 	}
-	if msg.Route.Dst.InstId != "instId2" {
-		t.Errorf("expected instId2, got %s", msg.Route.Dst.InstId)
+	if msg.Route.Dst.TrxId != "trxId2" {
+		t.Errorf("expected trxId2, got %s", msg.Route.Dst.TrxId)
 	}
 	// create a new instance of CustomData
 
@@ -167,7 +167,7 @@ func TestMessageUnmarshal(t *testing.T) {
 }
 
 func TestMessageUnmarshalError(t *testing.T) {
-	b := []byte(`{"route":{"trxId":"123456","org":{"service":"service1","srvId":"srvId1","node":"node1","instId":"instId1"},"dst":{"service":"service2","srvId":"srvId2","node":"node2","instId":"instId2"}},"msg":{"data":{"content":"content","options":{"key1":"value1","key2":"value2"}},"metadata":{"retry_number":1,"processing_time_ns":"1000000000","request_stamp":"2020-01-01T00:00:00Z"}}}`)
+	b := []byte(`{"route":{"sessionId":"123456","org":{"service":"service1","srvId":"srvId1","node":"node1","trxId":"trxId1"},"dst":{"service":"service2","srvId":"srvId2","node":"node2","trxId":"trxId2"}},"msg":{"data":{"content":"content","options":{"key1":"value1","key2":"value2"}},"metadata":{"retry_number":1,"processing_time_ns":"1000000000","request_stamp":"2020-01-01T00:00:00Z"}}}`)
 	var msg MessageResponse
 	err := json.Unmarshal(b, &msg)
 	if err != nil {
@@ -184,12 +184,12 @@ func TestEnsambleDownToUpStructure(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	processingInstanceOrg := ProcessingInstance{Service: "service1", SrvId: "srvId1", Node: "node1", InstId: "instId1"}
-	ProcessingInstanceDst := ProcessingInstance{Service: "service2", SrvId: "srvId2", Node: "node2", InstId: "instId2"}
-	route := Route{TrxId: "123456", Org: processingInstanceOrg, Dst: ProcessingInstanceDst}
+	processingInstanceOrg := ProcessingInstance{Service: "service1", SrvId: "srvId1", Node: "node1", TrxId: "trxId1"}
+	ProcessingInstanceDst := ProcessingInstance{Service: "service2", SrvId: "srvId2", Node: "node2", TrxId: "trxId2"}
+	route := Route{SessionId: "123456", Org: processingInstanceOrg, Dst: ProcessingInstanceDst}
 	msg := BodyResponse{Data: dataBytes, Metadata: metadata, ResponseStatus: responseStatus}
 	message := MessageResponse{Route: route, Body: msg}
-	expected := `{"route":{"trxId":"123456","org":{"service":"service1","srvId":"srvId1","node":"node1","instId":"instId1"},"dst":{"service":"service2","srvId":"srvId2","node":"node2","instId":"instId2"}},"msg":{"data":{"content":"content","options":{"key1":"value1","key2":"value2"}},"metadata":{"retry_number":1,"processing_time_ns":"1000000000","request_stamp":"2020-01-01T00:00:00Z"},"response_status":{"code":200,"desc":"OK"}}}`
+	expected := `{"route":{"sessionId":"123456","org":{"service":"service1","srvId":"srvId1","node":"node1","trxId":"trxId1"},"dst":{"service":"service2","srvId":"srvId2","node":"node2","trxId":"trxId2"}},"msg":{"data":{"content":"content","options":{"key1":"value1","key2":"value2"}},"metadata":{"retry_number":1,"processing_time_ns":"1000000000","request_stamp":"2020-01-01T00:00:00Z"},"response_status":{"code":200,"desc":"OK"}}}`
 	b, err := json.Marshal(message)
 	if err != nil {
 		t.Fatal(err)
@@ -202,10 +202,10 @@ func TestEnsambleDownToUpStructure(t *testing.T) {
 
 func TestSwapRouteSyncronous(t *testing.T) {
 
-	processingInstanceOrg := ProcessingInstance{Service: "service1", SrvId: "srvId1", Node: "node1", InstId: "instId1"}
-	ProcessingInstanceDst := ProcessingInstance{Service: "service2", SrvId: "srvId2", Node: "node2", InstId: "instId2"}
-	route := Route{TrxId: "123456", Org: processingInstanceOrg, Dst: ProcessingInstanceDst}
-	routeSwapped := Route{TrxId: "123456", Org: ProcessingInstanceDst, Dst: processingInstanceOrg}
+	processingInstanceOrg := ProcessingInstance{Service: "service1", SrvId: "srvId1", Node: "node1", TrxId: "trxId1"}
+	ProcessingInstanceDst := ProcessingInstance{Service: "service2", SrvId: "srvId2", Node: "node2", TrxId: "trxId2"}
+	route := Route{SessionId: "123456", Org: processingInstanceOrg, Dst: ProcessingInstanceDst}
+	routeSwapped := Route{SessionId: "123456", Org: ProcessingInstanceDst, Dst: processingInstanceOrg}
 	route.SwapRouteSyncronous()
 	if route != routeSwapped {
 		t.Errorf("expected %v, got %v", routeSwapped, route)
@@ -213,10 +213,10 @@ func TestSwapRouteSyncronous(t *testing.T) {
 }
 
 func TestSwapRouteAsyncronous(t *testing.T) {
-	processingInstanceOrg := ProcessingInstance{Service: "service1", SrvId: "srvId1", Node: "node1", InstId: "instId1"}
-	ProcessingInstanceDst := ProcessingInstance{Service: "service2", SrvId: "srvId2", Node: "node2", InstId: "instId2"}
-	route := Route{TrxId: "123456", Org: processingInstanceOrg, Dst: ProcessingInstanceDst}
-	routeExpected := Route{TrxId: "123456", Org: ProcessingInstanceDst, Dst: ProcessingInstance{Service: "service1", SrvId: "srvId1", Node: "", InstId: ""}}
+	processingInstanceOrg := ProcessingInstance{Service: "service1", SrvId: "srvId1", Node: "node1", TrxId: "trxId1"}
+	ProcessingInstanceDst := ProcessingInstance{Service: "service2", SrvId: "srvId2", Node: "node2", TrxId: "trxId2"}
+	route := Route{SessionId: "123456", Org: processingInstanceOrg, Dst: ProcessingInstanceDst}
+	routeExpected := Route{SessionId: "123456", Org: ProcessingInstanceDst, Dst: ProcessingInstance{Service: "service1", SrvId: "srvId1", Node: "", TrxId: ""}}
 	route.SwapRouteAsyncronous()
 	fmt.Printf("route: %s\n", route.String())
 	if route != routeExpected {
@@ -225,9 +225,9 @@ func TestSwapRouteAsyncronous(t *testing.T) {
 }
 
 func TestPrintMessageResponse(t *testing.T) {
-	processingInstanceOrg := ProcessingInstance{Service: "service1", SrvId: "srvId1", Node: "node1", InstId: "instId1"}
-	ProcessingInstanceDst := ProcessingInstance{Service: "service2", SrvId: "srvId2", Node: "node2", InstId: "instId2"}
-	route := Route{TrxId: "123456", Org: processingInstanceOrg, Dst: ProcessingInstanceDst}
+	processingInstanceOrg := ProcessingInstance{Service: "service1", SrvId: "srvId1", Node: "node1", TrxId: "trxId1"}
+	ProcessingInstanceDst := ProcessingInstance{Service: "service2", SrvId: "srvId2", Node: "node2", TrxId: "trxId2"}
+	route := Route{SessionId: "123456", Org: processingInstanceOrg, Dst: ProcessingInstanceDst}
 	responseStatus := ResponseStatus{Code: 200, Desc: "OK"}
 	metadata := Metadata{RetryNumber: 1, ProcessingTimeNs: "1000000000", RequestStamp: "2020-01-01T00:00:00Z"}
 	data := Data{Content: "content", Options: map[string]interface{}{"key1": "value1", "key2": "value2"}}
@@ -237,8 +237,8 @@ func TestPrintMessageResponse(t *testing.T) {
 	}
 	msg := BodyResponse{Data: dataBytes, Metadata: metadata, ResponseStatus: responseStatus}
 	message := MessageResponse{Route: route, Body: msg}
-	expected := "Message{Route: Route{TrxId: 123456, Org: ProcessingInstance{Service: service1, SrvId: srvId1, Node: node1, InstId: instId1},"
-	expected += " Dst: ProcessingInstance{Service: service2, SrvId: srvId2, Node: node2, InstId: instId2}}, Msg: "
+	expected := "Message{Route: Route{SessionId: 123456, Org: ProcessingInstance{Service: service1, SrvId: srvId1, Node: node1, TrxId: trxId1},"
+	expected += " Dst: ProcessingInstance{Service: service2, SrvId: srvId2, Node: node2, TrxId: trxId2}}, Msg: "
 	expected += "Body{Data: {\"content\":\"content\",\"options\":{\"key1\":\"value1\",\"key2\":\"value2\"}}, Metadata: Metadata{RetryNumber: 1, ProcessingTimeNs: 1000000000, RequestStamp: 2020-01-01T00:00:00Z}, ResponseStatus: ResponseStatus{Code: 200, Desc: OK}}}"
 
 	if message.String() != expected {
@@ -255,15 +255,15 @@ func TestPrintMessageResponse(t *testing.T) {
 }
 
 func TestPrintMessageRequest(t *testing.T) {
-	processingInstanceOrg := ProcessingInstance{Service: "service1", SrvId: "srvId1", Node: "node1", InstId: "instId1"}
-	ProcessingInstanceDst := ProcessingInstance{Service: "service2", SrvId: "srvId2", Node: "node2", InstId: "instId2"}
-	route := Route{TrxId: "123456", Org: processingInstanceOrg, Dst: ProcessingInstanceDst}
+	processingInstanceOrg := ProcessingInstance{Service: "service1", SrvId: "srvId1", Node: "node1", TrxId: "trxId1"}
+	ProcessingInstanceDst := ProcessingInstance{Service: "service2", SrvId: "srvId2", Node: "node2", TrxId: "trxId2"}
+	route := Route{SessionId: "123456", Org: processingInstanceOrg, Dst: ProcessingInstanceDst}
 	metadata := Metadata{RetryNumber: 1, ProcessingTimeNs: "1000000000", RequestStamp: "2020-01-01T00:00:00Z"}
 	data := Data{Content: "content", Options: map[string]interface{}{"key1": "value1", "key2": "value2"}}
 	msg := BodyRequest{Data: data, Metadata: metadata}
 	message := MessageRequest{Route: route, Body: msg}
-	expected := "Message{Route: Route{TrxId: 123456, Org: ProcessingInstance{Service: service1, SrvId: srvId1, Node: node1, InstId: instId1},"
-	expected += " Dst: ProcessingInstance{Service: service2, SrvId: srvId2, Node: node2, InstId: instId2}}, Msg: "
+	expected := "Message{Route: Route{SessionId: 123456, Org: ProcessingInstance{Service: service1, SrvId: srvId1, Node: node1, TrxId: trxId1},"
+	expected += " Dst: ProcessingInstance{Service: service2, SrvId: srvId2, Node: node2, TrxId: trxId2}}, Msg: "
 	expected += "Body{Data: Data{Content: content, Options: map[key1: value1, key2: value2]}, Metadata: Metadata{RetryNumber: 1, ProcessingTimeNs: 1000000000, RequestStamp: 2020-01-01T00:00:00Z}}}"
 
 	if message.String() != expected {
@@ -280,7 +280,7 @@ func TestPrintMessageRequest(t *testing.T) {
 }
 
 func TestParseMessageRequest(t *testing.T) {
-	received_msg := "{\"route\":{\"trxId\":\"2cf16549d989b25fdd1bb6251\",\"org\":{\"service\":\"content_validation\",\"srvId\":\"0\",\"node\":\"\",\"instId\":\"378df32521\"},\"dst\":{\"service\":\"language_validator\",\"srvId\":\"1\",\"node\":\"\",\"instId\":\"\"}},\"msg\":{\"data\":{\"content\":\"This is a new content.\",\"options\":{\"threshold\":\"98\"}},\"metadata\":{\"retry_number\":1,\"processing_time_ns\":\"13243438\",\"request_stamp\":\"2024-05-06T09:32:04Z\"}}}"
+	received_msg := "{\"route\":{\"sessionId\":\"2cf16549d989b25fdd1bb6251\",\"org\":{\"service\":\"content_validation\",\"srvId\":\"0\",\"node\":\"\",\"trxId\":\"378df32521\"},\"dst\":{\"service\":\"language_validator\",\"srvId\":\"1\",\"node\":\"\",\"trxId\":\"\"}},\"msg\":{\"data\":{\"content\":\"This is a new content.\",\"options\":{\"threshold\":\"98\"}},\"metadata\":{\"retry_number\":1,\"processing_time_ns\":\"13243438\",\"request_stamp\":\"2024-05-06T09:32:04Z\"}}}"
 	var msg MessageRequest
 	msg.ParseMessageRequest(received_msg)
 
@@ -308,21 +308,23 @@ func TestGenericMessage(t *testing.T) {
 	}
 
 	testBytes, err := json.Marshal(testStruct)
-
+	if err != nil {
+		t.Fatal(err)
+	}
 	msg := GenericMessage{
 		Route: Route{
-			TrxId: "123456",
+			SessionId: "123456",
 			Org: ProcessingInstance{
 				Service: "service1",
 				SrvId:   "srvId1",
 				Node:    "node1",
-				InstId:  "instId1",
+				TrxId:   "trxId1",
 			},
 			Dst: ProcessingInstance{
 				Service: "service2",
 				SrvId:   "srvId2",
 				Node:    "node2",
-				InstId:  "instId2",
+				TrxId:   "trxId2",
 			},
 		},
 		Body: testBytes,
@@ -332,7 +334,7 @@ func TestGenericMessage(t *testing.T) {
 		t.Fatal(err)
 	}
 	bStr := string(b)
-	expected := `{"route":{"trxId":"123456","org":{"service":"service1","srvId":"srvId1","node":"node1","instId":"instId1"},"dst":{"service":"service2","srvId":"srvId2","node":"node2","instId":"instId2"}},"msg":{"varaux":"content","vartrax":"content"}}`
+	expected := `{"route":{"sessionId":"123456","org":{"service":"service1","srvId":"srvId1","node":"node1","trxId":"trxId1"},"dst":{"service":"service2","srvId":"srvId2","node":"node2","trxId":"trxId2"}},"msg":{"varaux":"content","vartrax":"content"}}`
 	if bStr != expected {
 		t.Errorf("expected %s, got %s", expected, bStr)
 	}
